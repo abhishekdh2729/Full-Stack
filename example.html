@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ticketBookingApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket Booking System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div ng-controller="TicketController as ticketCtrl">
+        <h1>Ticket Booking System</h1>
+        <form ng-submit="ticketCtrl.addTicket()">
+            <label for="name">Name:</label>
+            <input type="text" id="name" ng-model="ticketCtrl.newTicket.name" required><br>
+            <label for="phone">Phone:</label>
+            <!-- Using custom directive 'numbersOnly' -->
+            <input type="text" id="phone" ng-model="ticketCtrl.newTicket.phone" required numbers-only><br>
+            <label for="place">Place:</label>
+            <input type="text" id="place" ng-model="ticketCtrl.newTicket.place" required><br>
+            <label for="status">Status:</label>
+            <select id="status" ng-model="ticketCtrl.newTicket.status" required>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select><br>
+            <button type="submit">Add Ticket</button>
+        </form>
+
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Place</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            <tr ng-repeat="ticket in ticketCtrl.tickets">
+                <td>{{ticket.name}}</td>
+                <td>{{ticket.phone}}</td>
+                <td>{{ticket.place}}</td>
+                <td>{{ticket.status}}</td>
+                <td>
+                    <button ng-click="ticketCtrl.editTicket($index)">Edit</button>
+                    <button ng-click="ticketCtrl.deleteTicket($index)">Delete</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="app.js"></script>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+            background-color:olive ;
+            text-align: center;
+            margin: 50px;
+        }
+        input{
+          padding: 5px;
+        }
+        label{
+        
+          padding: 5px;
+        }
+        form{
+          padding: 5px;
+        }
+       
+        
+        table {
+    border-collapse: collapse;
+    width: 50%;
+}
+
+th, td {
+    border: 1px solid #dddddd94;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color:white;
+}
+    </style>
+    <script>
+        angular.module('ticketBookingApp', [])
+    .controller('TicketController', function() {
+        var vm = this;
+
+        vm.tickets = [];
+        vm.newTicket = { name: '', phone: '', status: 'Pending' };
+        vm.editingIndex = -1;
+
+        vm.addTicket = function() {
+            if (vm.editingIndex === -1) {
+                vm.tickets.push(angular.copy(vm.newTicket));
+            } else {
+                vm.tickets[vm.editingIndex] = angular.copy(vm.newTicket);
+                vm.editingIndex = -1;
+            }
+            vm.clearForm();
+        };
+
+        vm.editTicket = function(index) {
+            vm.newTicket = angular.copy(vm.tickets[index]);
+            vm.editingIndex = index;
+        };
+
+        vm.deleteTicket = function(index) {
+            vm.tickets.splice(index, 1);
+        };
+
+        vm.clearForm = function() {
+            vm.newTicket = { name: '', phone: '', status: 'Pending' };
+            vm.editingIndex = -1;
+        };
+    })
+    // Custom directive for allowing only numbers in input fields
+    .directive('numbersOnly', function () {
+        return {
+            require: 'ngModel',
+            link: function (scope, element, attr, ngModelCtrl) {
+                function fromUser(text) {
+                    if (text) {
+                        var transformedInput = text.replace(/[^0-9]/g, '');
+
+                        if (transformedInput !== text) {
+                            ngModelCtrl.$setViewValue(transformedInput);
+                            ngModelCtrl.$render();
+                        }
+                        return transformedInput;
+                    }
+                    return undefined;
+                }            
+                ngModelCtrl.$parsers.push(fromUser);
+            }
+        };
+    });
+
+    </script>
+</body>
+</html>
